@@ -22,6 +22,9 @@ class Node {
   double   bw;
   double   lat;
 
+    Table *rt;
+    void UpdateNeighbors(unsigned dest, unsigned latency);
+
 #if defined(LINKSTATE)
 #endif
 
@@ -31,6 +34,9 @@ class Node {
   // students will add protocol-specific data here
 
  public:
+  
+    friend class Table;
+
   Node(const unsigned n, SimulationContext *c, double b, double l);
   Node();
   Node(const Node &rhs);
@@ -50,6 +56,7 @@ class Node {
   virtual void SendToNeighbors(const RoutingMessage *m);
   virtual void SendToNeighbor(const Node *n, const RoutingMessage *m);
   virtual deque<Node*> *GetNeighbors();
+  virtual deque<Link*> *GetOutgoingLinks();
   virtual void SetTimeOut(const double timefromnow);
 
   //
@@ -58,7 +65,7 @@ class Node {
   virtual void LinkHasBeenUpdated(const Link *l);
   virtual void ProcessIncomingRoutingMessage(const RoutingMessage *m);
   virtual void TimeOut();
-  virtual Node *GetNextHop(const Node *destination) const;
+  virtual Node *GetNextHop(const Node *destination);
   virtual Table *GetRoutingTable() const;
 
   virtual ostream & Print(ostream &os) const;

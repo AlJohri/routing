@@ -5,13 +5,18 @@
 
 Node::Node(const unsigned n, SimulationContext *c, double b, double l) : 
     number(n), context(c), bw(b), lat(l) 
-{}
+{
+    if (c != NULL){
+        this->rt = new Table(*this);
+
+    cerr << "now: " << endl << *this;}
+}
 
 Node::Node() 
 { throw GeneralException(); }
 
 Node::Node(const Node &rhs) : 
-  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat) {}
+  number(rhs.number), context(rhs.context), bw(rhs.bw), lat(rhs.lat), rt(rhs.rt) {}
 
 Node & Node::operator=(const Node &rhs) 
 {
@@ -55,6 +60,11 @@ deque<Node*> *Node::GetNeighbors()
   return context->GetNeighbors(this);
 }
 
+deque<Link*> *Node::GetOutgoingLinks()
+{
+    return context->GetOutgoingLinks(this);
+}
+
 void Node::SetTimeOut(const double timefromnow)
 {
   context->TimeOut(this,timefromnow);
@@ -87,7 +97,7 @@ void Node::TimeOut()
   cerr << *this << " got a timeout: ignored"<<endl;
 }
 
-Node *Node::GetNextHop(const Node *destination) const
+Node *Node::GetNextHop(const Node *destination)
 {
   return 0;
 }
@@ -125,7 +135,7 @@ void Node::TimeOut()
   cerr << *this << " got a timeout: ignored"<<endl;
 }
 
-Node *Node::GetNextHop(const Node *destination) const
+Node *Node::GetNextHop(const Node *destination)
 {
   // WRITE
   return 0;
@@ -148,16 +158,59 @@ ostream & Node::Print(ostream &os) const
 
 #if defined(DISTANCEVECTOR)
 
+void Node::UpdateNeighbors(unsigned dest, unsigned latency) {
+    deque<Link*> *links = this->GetOutgoingLinks();
+    deque<Node*> *nodes = this->GetNeighbors();
+
+    RoutingMessage *message = new RoutingMessage(this->GetNumber(), dest, latency);
+
+    Node *curr;
+
+    for (deque<Link*>::iterator i = links->begin(); i != links->end(); ++i) {
+
+        for (deque<Node*>::iterator j = nodes->begin(); j != nodes->end(); ++j) {
+
+            if (Node((*i)->GetDest(), 0, 0, 0).Matches(**j)) {
+                curr = *j;
+                break;
+            }
+        }
+
+        Event *event = new Event(context->GetTime() + (*i)->GetLatency(), ROUTING_MESSAGE_ARRIVAL, curr, message);
+
+        context->PostEvent(event);
+
+    }
+    delete links;
+    delete nodes;
+}
+
 void Node::LinkHasBeenUpdated(const Link *l)
 {
   // update our table
   // send out routing mesages
+  cerr << "Should I update my routing table with this? : " << endl;
   cerr << *this<<": Link Update: "<<*l<<endl;
+  // WriteTable(); src->dest latency to me->dest latency
+  // is src always 1 hop from me? 
+  // then first hop is always src
+ 
+
+    if (this->rt->WriteTable(l->GetDest(), l->GetDest(), l->GetLatency())) {
+        this->UpdateNeighbors(l->GetDest(), l->GetLatency());
+    }
 }
 
 
 void Node::ProcessIncomingRoutingMessage(const RoutingMessage *m)
 {
+    cerr << "PROCESS" << endl << *m << endl;
+
+    Link *l = context->FindMatchingLink(new Link(this->GetNumber(), m->GetSrc(), 0, 0, 0));
+
+    if (this->rt->WriteTable(m->GetDest(), m->GetSrc(), m->GetLatency() + l->GetLatency())) {
+        this->UpdateNeighbors(m->GetDest(), m->GetLatency() + l->GetLatency());
+    }
 
 }
 
@@ -167,18 +220,37 @@ void Node::TimeOut()
 }
 
 
-Node *Node::GetNextHop(const Node *destination) const
+Node *Node::GetNextHop(const Node *destination)
 {
+
+    //cerr << *this << " next hop: " << *destination << endl;
+
+    deque<Node*> *nodes = this->GetNeighbors();
+
+    unsigned ret = this->rt->GetNext(destination->GetNumber());
+
+    //cerr << *this;
+
+    for (deque<Node*>::const_iterator i = nodes->begin(); i != nodes->end(); ++i) {
+        if ((Node(ret, 0, 0, 0).Matches(**i))) {
+            cerr << "Success: " << ret << ": " << destination->GetNumber() << endl;
+            return new Node(**i); // change to new node **i
+        }
+    }
+
+    return 0;
 }
 
 Table *Node::GetRoutingTable() const
 {
+    return new Table(*(this->rt)); // change to new Table
+    //return 0;
 }
 
 
 ostream & Node::Print(ostream &os) const
 {
-  os << "Node(number="<<number<<", lat="<<lat<<", bw="<<bw;
+  os << "Node(number="<<number<<", lat="<<lat<<", bw="<<bw<<")" << *rt;
   return os;
 }
 #endif

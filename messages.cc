@@ -31,15 +31,32 @@ RoutingMessage::RoutingMessage(const RoutingMessage &rhs)
 
 ostream &RoutingMessage::Print(ostream &os) const
 {
+
+    os << "New path from " << src << " to " << dest << " of " << latency << endl;
+
   return os;
 }
 
 RoutingMessage::RoutingMessage()
 {}
 
+RoutingMessage::RoutingMessage(unsigned s, unsigned d, unsigned l): src(s), dest(d), latency(l) {}
 
-RoutingMessage::RoutingMessage(const RoutingMessage &rhs)
+RoutingMessage::RoutingMessage(const RoutingMessage &rhs): src(rhs.src), dest(rhs.dest), latency(rhs.latency)
 {}
+
+unsigned RoutingMessage::GetSrc() const {
+    return src;
+}
+
+unsigned RoutingMessage::GetDest() const {
+    return dest;
+}
+
+unsigned RoutingMessage::GetLatency() const {
+    return latency;
+}
+
 
 #endif
 

@@ -3,6 +3,9 @@
 
 
 #include <iostream>
+#include <vector>
+#include "node.h"
+#include "link.h"
 
 using namespace std;
 
@@ -28,8 +31,22 @@ class Table {
 
 #include <deque>
 
+class Node;
+class Link;
+
 class Table {
+private: 
+    vector<vector<double> > table;
+
  public:
+
+    Table();
+    Table(Node me);
+    int GetSize();
+    bool WriteTable(unsigned src, unsigned nxt, double dist);
+    double ReadTable(unsigned src, unsigned nxt);
+    unsigned GetNext(unsigned dest);
+
   ostream & Print(ostream &os) const;
 };
 #endif
