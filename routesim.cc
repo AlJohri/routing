@@ -11,7 +11,7 @@ int main(int argc, char **argv)
   string topofile, eventfile;
 
   if (argc<3 || argc>4 ) {
-    cerr <<"routesim topologyfile eventfile [singlestep]"<<endl;
+    cerr << "routesim topologyfile eventfile [singlestep]" << endl;
     exit(-1);
   }
   singlestep=(argc==4);

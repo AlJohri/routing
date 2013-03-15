@@ -22,20 +22,22 @@ class Node {
   double   bw;
   double   lat;
 
-    Table *rt;
-    void UpdateNeighbors(unsigned dest, unsigned latency);
 
 #if defined(LINKSTATE)
+  Table *topo;
 #endif
 
 #if defined(DISTANCEVECTOR)
+  Table *rt;
+  void UpdateNeighbors(unsigned dest, unsigned latency);
+
 #endif
 
   // students will add protocol-specific data here
 
  public:
   
-    friend class Table;
+  friend class Table;
 
   Node(const unsigned n, SimulationContext *c, double b, double l);
   Node();

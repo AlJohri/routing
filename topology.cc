@@ -62,13 +62,10 @@ deque<Node*> *Topology::GetNeighbors(const Node *n)
   deque<Link*> *temp = GetOutgoingLinks(n);
   deque<Node*> *nodes = new deque<Node*>;
 
-  for (deque<Link*>::iterator i=temp->begin();
-	   i!=temp->end(); ++i) { 
+  for (deque<Link*>::iterator i=temp->begin(); i!=temp->end(); ++i)
     nodes->push_back(FindMatchingNode(&Node((*i)->GetDest(),0,0,0)));
-  }
   return nodes;
 }
-
 
 deque<Link*>::iterator Topology::FindMatchingLinkIt(const Link *l)
 {
@@ -135,14 +132,13 @@ void Topology::DeleteLink(const Link *l)
   }
 }
 
-
 void Topology::ChangeLink(const Link *l)
 {
   deque<Link*>::iterator i=FindMatchingLinkIt(l);
-  if (i!=links.end()) { 
+  if (i!=links.end())
     **i=*l;
-  }
-  Node *n=FindMatchingNode(&Node(l->GetSrc(),0,0,0));
+
+  Node *n = FindMatchingNode(&Node(l->GetSrc(),0,0,0));
   n->LinkHasBeenUpdated(l);
 }
 
@@ -220,8 +216,8 @@ void Topology::CollectShortestPathTreeLinks(const Node &src, deque<Link> &links)
     unsigned closest;
     for (deque<unsigned>::iterator i=unvisited.begin(); i!=unvisited.end();++i) { 
       if (distance[*i]<curmin) { 
-	curmin=distance[*i];
-	c=i;
+        curmin=distance[*i];
+        c=i;
       }
     }
     closest=*c;

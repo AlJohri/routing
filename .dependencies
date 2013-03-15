@@ -1,7 +1,7 @@
-node.o: node.cc node.h table.h context.h topology.h link.h eventqueue.h \
+node.o: node.cc node.h table.h link.h context.h topology.h eventqueue.h \
  event.h messages.h error.h
 link.o: link.cc link.h
-table.o: table.cc table.h
+table.o: table.cc table.h node.h link.h
 messages.o: messages.cc messages.h node.h table.h link.h
 topology.o: topology.cc topology.h node.h table.h link.h
 event.o: event.cc event.h messages.h node.h table.h link.h topology.h \
